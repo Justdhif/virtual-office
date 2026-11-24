@@ -117,21 +117,9 @@ interface OfficeState {
   isLoadingData: boolean;
   fetchOfficeState: () => Promise<void>;
 
-  // Sarah Adams Clarification Dialog
-  sarahClarification: {
-    isOpen: boolean;
-    instructionTopic: string;
-    question: string;
-    options: string[];
-  } | null;
-  openSarahClarification: (data: { instructionTopic: string; question: string; options: string[] }) => void;
-  closeSarahClarification: () => void;
-
   // UI Panels
   activeTab: "office" | "tasks" | "documents" | "approvals" | "activity";
   setActiveTab: (tab: "office" | "tasks" | "documents" | "approvals" | "activity") => void;
-  isFeedOpen: boolean;
-  toggleFeed: () => void;
 
   // Team Meeting Event
   isMeetingActive: boolean;
@@ -465,15 +453,8 @@ export const useOfficeStore = create<OfficeState>((set, get) => ({
     }
   },
 
-  sarahClarification: null,
-  openSarahClarification: (data) =>
-    set({ sarahClarification: { ...data, isOpen: true } }),
-  closeSarahClarification: () => set({ sarahClarification: null }),
-
   activeTab: "office",
   setActiveTab: (tab) => set({ activeTab: tab }),
-  isFeedOpen: true,
-  toggleFeed: () => set((state) => ({ isFeedOpen: !state.isFeedOpen })),
 
   isMeetingActive: false,
   toggleMeeting: () => {

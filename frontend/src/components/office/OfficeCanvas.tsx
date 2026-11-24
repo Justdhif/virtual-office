@@ -40,9 +40,11 @@ export function OfficeCanvas() {
     <div className="w-full h-full relative" style={{ background: "#060d1f" }}>
       <Canvas
         shadows
+        dpr={[1, 1.75]} // Clamps Retina DPR to prevent mobile GPU thermal throttling
         gl={{
           antialias: true,
           alpha: false,
+          stencil: false,
           powerPreference: "high-performance",
           toneMapping: 3, // ACESFilmicToneMapping
           toneMappingExposure: 1.1,
@@ -65,8 +67,8 @@ export function OfficeCanvas() {
           position={[14, 25, -12]}
           intensity={sunIntensity}
           castShadow
-          shadow-mapSize-width={4096}
-          shadow-mapSize-height={4096}
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
           shadow-bias={-0.0001}
           shadow-camera-near={0.5}
           shadow-camera-far={80}

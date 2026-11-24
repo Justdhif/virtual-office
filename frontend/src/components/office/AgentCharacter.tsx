@@ -289,6 +289,11 @@ function generateWalkPath(
   return waypoints;
 }
 
+// Reusable scratch vectors to avoid per-frame GC allocations (Performance Optimization)
+const _vTarget = new THREE.Vector3();
+const _vDir = new THREE.Vector3();
+const _vTemp = new THREE.Vector3();
+
 export function AgentCharacter({ agent }: { agent: AgentVisual }) {
   const groupRef = useRef<THREE.Group>(null);
   const headRef = useRef<THREE.Mesh>(null);
@@ -384,26 +389,26 @@ export function AgentCharacter({ agent }: { agent: AgentVisual }) {
       groupRef.current.rotation.z = 0;
 
       const nextTarget = waypointQueue.current[0];
-      const targetVec = new THREE.Vector3(...nextTarget);
-      const dist = currentPos.current.distanceTo(targetVec);
+      _vTarget.set(nextTarget[0], nextTarget[1], nextTarget[2]);
+      const dist = currentPos.current.distanceTo(_vTarget);
 
       if (dist < 0.15) {
         // Reached this waypoint, pop and proceed to next
         waypointQueue.current.shift();
         if (waypointQueue.current.length === 0) {
-          currentPos.current.copy(targetVec);
-          groupRef.current.position.x = targetVec.x;
-          groupRef.current.position.z = targetVec.z;
+          currentPos.current.copy(_vTarget);
+          groupRef.current.position.x = _vTarget.x;
+          groupRef.current.position.z = _vTarget.z;
         }
       } else {
-        // Move towards current waypoint
-        const dir = new THREE.Vector3().subVectors(targetVec, currentPos.current).normalize();
-        currentPos.current.addScaledVector(dir, Math.min(dist, delta * 2.1));
+        // Move towards current waypoint without allocations
+        _vDir.subVectors(_vTarget, currentPos.current).normalize();
+        currentPos.current.addScaledVector(_vDir, Math.min(dist, delta * 2.1));
         groupRef.current.position.x = currentPos.current.x;
         groupRef.current.position.z = currentPos.current.z;
 
         // Turn body to face movement direction
-        const angle = Math.atan2(dir.x, dir.z);
+        const angle = Math.atan2(_vDir.x, _vDir.z);
         groupRef.current.rotation.y = angle;
 
         // Walking leg swing & arm swing
@@ -432,8 +437,8 @@ export function AgentCharacter({ agent }: { agent: AgentVisual }) {
       isWalking.current = false;
 
       const meetingSeat = MEETING_SEATS[agent.id];
-      const isAtMeetingChair = meetingSeat && currentPos.current.distanceTo(new THREE.Vector3(...meetingSeat.pos)) < 0.45;
-      const isAtHomeDesk = currentPos.current.distanceTo(new THREE.Vector3(...homeDeskPos)) < 0.45;
+      const isAtMeetingChair = meetingSeat && currentPos.current.distanceTo(_vTemp.set(meetingSeat.pos[0], meetingSeat.pos[1], meetingSeat.pos[2])) < 0.45;
+      const isAtHomeDesk = currentPos.current.distanceTo(_vTemp.set(homeDeskPos[0], homeDeskPos[1], homeDeskPos[2])) < 0.45;
 
       // --- SCENARIO A: MEETING TABLE ---
       if (isAtMeetingChair && (agent.status === "meeting" || isAtMeetingChair)) {

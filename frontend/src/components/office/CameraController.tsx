@@ -24,12 +24,18 @@ export function CameraController() {
 
   useFrame(() => {
     if (controlsRef.current) {
-      // Smoothly lerp orbit target
       const currentTarget = controlsRef.current.target;
-      currentTarget.x = THREE.MathUtils.lerp(currentTarget.x, cameraTarget[0], 0.05);
-      currentTarget.y = THREE.MathUtils.lerp(currentTarget.y, cameraTarget[1], 0.05);
-      currentTarget.z = THREE.MathUtils.lerp(currentTarget.z, cameraTarget[2], 0.05);
-      controlsRef.current.update();
+      const dx = Math.abs(currentTarget.x - cameraTarget[0]);
+      const dy = Math.abs(currentTarget.y - cameraTarget[1]);
+      const dz = Math.abs(currentTarget.z - cameraTarget[2]);
+
+      // Only perform target lerp and matrix update when transitioning
+      if (dx > 0.002 || dy > 0.002 || dz > 0.002) {
+        currentTarget.x = THREE.MathUtils.lerp(currentTarget.x, cameraTarget[0], 0.08);
+        currentTarget.y = THREE.MathUtils.lerp(currentTarget.y, cameraTarget[1], 0.08);
+        currentTarget.z = THREE.MathUtils.lerp(currentTarget.z, cameraTarget[2], 0.08);
+        controlsRef.current.update();
+      }
     }
   });
 

@@ -10,6 +10,9 @@ export function CameraController() {
   const controlsRef = useRef<any>(null);
   const { camera } = useThree();
   const cameraTarget = useOfficeStore((s) => s.cameraTarget);
+  const cameraMode = useOfficeStore((s) => s.cameraMode);
+  const zoomAction = useOfficeStore((s) => s.zoomAction);
+  const prevZoomAction = useRef(zoomAction);
 
   useEffect(() => {
     // Initial camera positioning: Wider view on mobile to capture whole office
@@ -21,6 +24,20 @@ export function CameraController() {
     }
     camera.lookAt(0, 0, 0);
   }, [camera]);
+
+  // Handle programmatically triggered smooth zoom-in & zoom-out
+  useEffect(() => {
+    if (controlsRef.current && zoomAction !== prevZoomAction.current) {
+      const diff = zoomAction - prevZoomAction.current;
+      prevZoomAction.current = zoomAction;
+      if (diff > 0) {
+        controlsRef.current.dollyIn(1.22);
+      } else {
+        controlsRef.current.dollyOut(1.22);
+      }
+      controlsRef.current.update();
+    }
+  }, [zoomAction]);
 
   useFrame(() => {
     if (controlsRef.current) {
@@ -53,10 +70,30 @@ export function CameraController() {
       panSpeed={1.2}
       rotateSpeed={0.85}
       zoomSpeed={1.2}
-      touches={{
-        ONE: THREE.TOUCH.ROTATE,
-        TWO: THREE.TOUCH.DOLLY_PAN,
-      }}
+      mouseButtons={
+        cameraMode === "grab"
+          ? {
+              LEFT: THREE.MOUSE.PAN,
+              MIDDLE: THREE.MOUSE.DOLLY,
+              RIGHT: THREE.MOUSE.ROTATE,
+            }
+          : {
+              LEFT: THREE.MOUSE.ROTATE,
+              MIDDLE: THREE.MOUSE.DOLLY,
+              RIGHT: THREE.MOUSE.PAN,
+            }
+      }
+      touches={
+        cameraMode === "grab"
+          ? {
+              ONE: THREE.TOUCH.PAN,
+              TWO: THREE.TOUCH.DOLLY_PAN,
+            }
+          : {
+              ONE: THREE.TOUCH.ROTATE,
+              TWO: THREE.TOUCH.DOLLY_PAN,
+            }
+      }
     />
   );
 }

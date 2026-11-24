@@ -8,6 +8,7 @@ import { AgentProfileModal } from "@/components/ui/AgentProfileModal";
 import { ActivityFeed } from "@/components/ui/ActivityFeed";
 import { ApprovalModal } from "@/components/ui/ApprovalModal";
 import { AgentChatDrawer } from "@/components/ui/AgentChatDrawer";
+import { CameraControlToolbar } from "@/components/ui/CameraControlToolbar";
 import { TaskBoardView } from "@/components/views/TaskBoardView";
 import { DocumentCenterView } from "@/components/views/DocumentCenterView";
 import { ApprovalsView } from "@/components/views/ApprovalsView";
@@ -58,6 +59,7 @@ export default function Home() {
           <ActivityFeed />
           <AgentProfileModal />
           <ApprovalModal />
+          <CameraControlToolbar />
 
           {/* Quick Floating Chat Button (Bottom Right) - hidden when drawer is already open */}
           {!isChatOpen && (

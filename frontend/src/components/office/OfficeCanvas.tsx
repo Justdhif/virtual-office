@@ -10,6 +10,7 @@ import { useOfficeStore } from "@/store/useOfficeStore";
 export function OfficeCanvas() {
   const agents = useOfficeStore((s) => s.agents);
   const virtualTime = useOfficeStore((s) => s.virtualTime);
+  const cameraMode = useOfficeStore((s) => s.cameraMode);
 
   // Dynamic day/night cycle
   const isDaytime = virtualTime >= 390 && virtualTime < 1050;
@@ -37,7 +38,12 @@ export function OfficeCanvas() {
   const officeLightColor = isNight ? "#dbeafe" : "#fffbeb";
 
   return (
-    <div className="w-full h-full relative" style={{ background: "#060d1f" }}>
+    <div
+      className={`w-full h-full relative ${
+        cameraMode === "grab" ? "cursor-grab active:cursor-grabbing" : "cursor-default"
+      }`}
+      style={{ background: "#060d1f" }}
+    >
       <Canvas
         shadows
         dpr={[1, 1.75]} // Clamps Retina DPR to prevent mobile GPU thermal throttling

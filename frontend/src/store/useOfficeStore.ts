@@ -68,10 +68,15 @@ interface OfficeState {
   selectAgent: (agentId: string | null) => void;
   updateAgentStatus: (agentId: string, status: AgentVisual["status"], task?: string) => void;
 
-  // Camera Target
+  // Camera Target & Mode
   cameraTarget: [number, number, number];
   setCameraTarget: (target: [number, number, number]) => void;
   resetCamera: () => void;
+  cameraMode: "rotate" | "grab";
+  setCameraMode: (mode: "rotate" | "grab") => void;
+  zoomAction: number;
+  triggerZoomIn: () => void;
+  triggerZoomOut: () => void;
 
   // Active Project (No hardcoded data - starts null!)
   currentProject: ProjectData | null;
@@ -256,6 +261,11 @@ export const useOfficeStore = create<OfficeState>((set, get) => ({
   cameraTarget: [0, 1, 0],
   setCameraTarget: (target) => set({ cameraTarget: target }),
   resetCamera: () => set({ cameraTarget: [0, 1, 0], selectedAgentId: null }),
+  cameraMode: "rotate",
+  setCameraMode: (mode) => set({ cameraMode: mode }),
+  zoomAction: 0,
+  triggerZoomIn: () => set((s) => ({ zoomAction: s.zoomAction + 1 })),
+  triggerZoomOut: () => set((s) => ({ zoomAction: s.zoomAction - 1 })),
 
   // 100% Dynamic - starts NULL/empty as requested by user
   currentProject: null,

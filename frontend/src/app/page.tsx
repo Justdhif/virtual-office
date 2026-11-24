@@ -5,13 +5,13 @@ import dynamic from "next/dynamic";
 import { MessageSquare } from "lucide-react";
 import { OfficeHeader } from "@/components/ui/OfficeHeader";
 import { AgentProfileModal } from "@/components/ui/AgentProfileModal";
-import { ActivityFeed } from "@/components/ui/ActivityFeed";
 import { ApprovalModal } from "@/components/ui/ApprovalModal";
 import { AgentChatDrawer } from "@/components/ui/AgentChatDrawer";
 import { CameraControlToolbar } from "@/components/ui/CameraControlToolbar";
 import { TaskBoardView } from "@/components/views/TaskBoardView";
 import { DocumentCenterView } from "@/components/views/DocumentCenterView";
 import { ApprovalsView } from "@/components/views/ApprovalsView";
+import { ActivityFeedView } from "@/components/views/ActivityFeedView";
 import { useOfficeStore } from "@/store/useOfficeStore";
 
 // Dynamically load 3D Canvas to bypass SSR
@@ -56,7 +56,6 @@ export default function Home() {
           </div>
 
           {/* Floating UI Overlays */}
-          <ActivityFeed />
           <AgentProfileModal />
           <ApprovalModal />
           <CameraControlToolbar />
@@ -86,6 +85,7 @@ export default function Home() {
       {activeTab === "tasks" && <TaskBoardView />}
       {activeTab === "documents" && <DocumentCenterView />}
       {activeTab === "approvals" && <ApprovalsView />}
+      {activeTab === "activity" && <ActivityFeedView />}
     </main>
   );
 }

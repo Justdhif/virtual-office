@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Building2, RotateCcw, Layers, FileText, CheckSquare, Zap } from "lucide-react";
+import { Building2, RotateCcw, Layers, FileText, CheckSquare, Zap, Activity } from "lucide-react";
 import { useOfficeStore } from "@/store/useOfficeStore";
 import { OfficeScheduleWidget } from "./OfficeScheduleWidget";
 
@@ -106,11 +106,12 @@ export function OfficeHeader() {
             { id: "tasks", label: "Tasks", Icon: Layers },
             { id: "documents", label: "Docs", Icon: FileText },
             { id: "approvals", label: "Approvals", Icon: CheckSquare },
+            { id: "activity", label: "Activity", Icon: Activity },
           ].map(({ id, label, Icon }) => (
             <button
               key={id}
-              onClick={() => setActiveTab(id as "office" | "tasks" | "documents" | "approvals")}
-              className="relative px-2.5 sm:px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 text-xs font-semibold transition-all duration-200"
+              onClick={() => setActiveTab(id as "office" | "tasks" | "documents" | "approvals" | "activity")}
+              className="relative px-2 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-xs font-semibold transition-all duration-200"
               style={
                 activeTab === id
                   ? {

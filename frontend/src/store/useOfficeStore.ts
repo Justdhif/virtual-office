@@ -128,8 +128,8 @@ interface OfficeState {
   closeSarahClarification: () => void;
 
   // UI Panels
-  activeTab: "office" | "tasks" | "documents" | "approvals";
-  setActiveTab: (tab: "office" | "tasks" | "documents" | "approvals") => void;
+  activeTab: "office" | "tasks" | "documents" | "approvals" | "activity";
+  setActiveTab: (tab: "office" | "tasks" | "documents" | "approvals" | "activity") => void;
   isFeedOpen: boolean;
   toggleFeed: () => void;
 

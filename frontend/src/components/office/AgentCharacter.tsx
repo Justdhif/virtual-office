@@ -370,7 +370,7 @@ export function AgentCharacter({ agent }: { agent: AgentVisual }) {
     }, intervalTime);
 
     return () => clearInterval(interval);
-  }, [agent.status, agent.id, homeDeskPos]);
+  }, [agent.status, agent.id, agent.position[0], agent.position[1], agent.position[2]]);
 
   // Main animation frame loop
   useFrame((state, delta) => {

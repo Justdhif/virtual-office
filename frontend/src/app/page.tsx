@@ -47,45 +47,54 @@ export default function Home() {
       {/* Universal Floating Header */}
       <OfficeHeader />
 
-      {/* Main View Switcher */}
-      {activeTab === "office" && (
-        <>
-          {/* 3D Three.js Office Canvas */}
-          <div className="w-full h-full">
-            <OfficeCanvas />
-          </div>
+      {/* 3D Three.js Office Canvas & 3D Overlays (Keep-alive in background so WebGL context & walking animations never reset) */}
+      <div
+        className={`w-full h-full absolute inset-0 transition-opacity duration-200 ${
+          activeTab === "office"
+            ? "opacity-100 pointer-events-auto z-0"
+            : "opacity-0 pointer-events-none -z-10"
+        }`}
+        aria-hidden={activeTab !== "office"}
+      >
+        <div className="w-full h-full">
+          <OfficeCanvas />
+        </div>
 
-          {/* Floating UI Overlays */}
-          <AgentProfileModal />
-          <ApprovalModal />
-          <CameraControlToolbar />
+        {/* Floating UI Overlays */}
+        <AgentProfileModal />
+        <ApprovalModal />
+        <CameraControlToolbar />
 
-          {/* Quick Floating Chat Button (Bottom Right) - hidden when drawer is already open */}
-          {!isChatOpen && (
-            <button
-              onClick={() => openChat(selectedAgentId || "project_manager")}
-              title="Bicara dengan AI Agent"
-              className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[80] p-3 sm:px-5 sm:py-3 rounded-2xl flex items-center gap-2 sm:gap-2.5 text-xs font-bold text-slate-950 transition-all duration-300 shadow-2xl hover:scale-105 active:scale-95"
-              style={{
-                background: "linear-gradient(135deg, #22d3ee 0%, #3b82f6 100%)",
-                boxShadow: "0 8px 32px rgba(34,211,238,0.45), 0 2px 8px rgba(0,0,0,0.3)",
-              }}
-            >
-              <MessageSquare className="w-4 h-4 text-slate-950" />
-              <span className="hidden xs:inline">Chat dengan Agen</span>
-              <span className="xs:hidden">Chat</span>
-            </button>
-          )}
-        </>
-      )}
+        {/* Quick Floating Chat Button (Bottom Right) - hidden when drawer is already open */}
+        {!isChatOpen && (
+          <button
+            onClick={() => openChat(selectedAgentId || "project_manager")}
+            title="Bicara dengan AI Agent"
+            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[80] p-3 sm:px-5 sm:py-3 rounded-2xl flex items-center gap-2 sm:gap-2.5 text-xs font-bold text-slate-950 transition-all duration-300 shadow-2xl hover:scale-105 active:scale-95"
+            style={{
+              background: "linear-gradient(135deg, #22d3ee 0%, #3b82f6 100%)",
+              boxShadow: "0 8px 32px rgba(34,211,238,0.45), 0 2px 8px rgba(0,0,0,0.3)",
+            }}
+          >
+            <MessageSquare className="w-4 h-4 text-slate-950" />
+            <span className="hidden xs:inline">Chat dengan Agen</span>
+            <span className="xs:hidden">Chat</span>
+          </button>
+        )}
+      </div>
 
       {/* Interactive AI Agent Conversation Drawer (Available in any tab) */}
       <AgentChatDrawer />
 
-      {activeTab === "tasks" && <TaskBoardView />}
-      {activeTab === "documents" && <DocumentCenterView />}
-      {activeTab === "approvals" && <ApprovalsView />}
-      {activeTab === "activity" && <ActivityFeedView />}
+      {/* Non-3D Tab Views */}
+      {activeTab !== "office" && (
+        <div className="relative z-10 w-full h-full">
+          {activeTab === "tasks" && <TaskBoardView />}
+          {activeTab === "documents" && <DocumentCenterView />}
+          {activeTab === "approvals" && <ApprovalsView />}
+          {activeTab === "activity" && <ActivityFeedView />}
+        </div>
+      )}
     </main>
   );
 }

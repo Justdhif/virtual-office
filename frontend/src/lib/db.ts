@@ -6,13 +6,15 @@ if (typeof WebSocket === "undefined") {
   neonConfig.webSocketConstructor = ws;
 }
 
-const connectionString =
-  process.env.DATABASE_URL ||
-  "postgresql://neondb_owner:npg_I5tcGr6nMkZX@ep-lively-hill-a18dqs9p-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require";
+const connectionString = process.env.DATABASE_URL || "";
 
 export const pool = new Pool({ connectionString });
 
 export async function query<T = any>(text: string, params: any[] = []): Promise<T[]> {
+  if (!process.env.DATABASE_URL) {
+    console.warn("DATABASE_URL is not configured in environment variables.");
+    return [];
+  }
   const client = await pool.connect();
   try {
     const res = await client.query(text, params);

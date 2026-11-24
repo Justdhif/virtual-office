@@ -14,6 +14,11 @@ export function CameraController() {
   const zoomAction = useOfficeStore((s) => s.zoomAction);
   const prevZoomAction = useRef(zoomAction);
 
+  // Transition tracking: Only lerp target when store value changes programmatically
+  // (e.g. clicking an agent or clicking Reset). Never fight manual user pan/grab!
+  const isTransitioningRef = useRef(false);
+  const prevTargetRef = useRef<[number, number, number]>(cameraTarget);
+
   useEffect(() => {
     // Initial camera positioning: Wider view on mobile to capture whole office
     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
@@ -24,6 +29,16 @@ export function CameraController() {
     }
     camera.lookAt(0, 0, 0);
   }, [camera]);
+
+  // Track programmatic target changes (select agent, reset camera)
+  useEffect(() => {
+    const [px, py, pz] = prevTargetRef.current;
+    const [tx, ty, tz] = cameraTarget;
+    if (Math.abs(px - tx) > 0.001 || Math.abs(py - ty) > 0.001 || Math.abs(pz - tz) > 0.001) {
+      prevTargetRef.current = cameraTarget;
+      isTransitioningRef.current = true;
+    }
+  }, [cameraTarget]);
 
   // Handle programmatically triggered smooth zoom-in & zoom-out
   useEffect(() => {
@@ -40,21 +55,30 @@ export function CameraController() {
   }, [zoomAction]);
 
   useFrame(() => {
-    if (controlsRef.current) {
+    if (controlsRef.current && isTransitioningRef.current) {
       const currentTarget = controlsRef.current.target;
       const dx = Math.abs(currentTarget.x - cameraTarget[0]);
       const dy = Math.abs(currentTarget.y - cameraTarget[1]);
       const dz = Math.abs(currentTarget.z - cameraTarget[2]);
 
-      // Only perform target lerp and matrix update when transitioning
-      if (dx > 0.002 || dy > 0.002 || dz > 0.002) {
-        currentTarget.x = THREE.MathUtils.lerp(currentTarget.x, cameraTarget[0], 0.08);
-        currentTarget.y = THREE.MathUtils.lerp(currentTarget.y, cameraTarget[1], 0.08);
-        currentTarget.z = THREE.MathUtils.lerp(currentTarget.z, cameraTarget[2], 0.08);
+      // Smoothly glide to the new target
+      if (dx > 0.005 || dy > 0.005 || dz > 0.005) {
+        currentTarget.x = THREE.MathUtils.lerp(currentTarget.x, cameraTarget[0], 0.1);
+        currentTarget.y = THREE.MathUtils.lerp(currentTarget.y, cameraTarget[1], 0.1);
+        currentTarget.z = THREE.MathUtils.lerp(currentTarget.z, cameraTarget[2], 0.1);
         controlsRef.current.update();
+      } else {
+        // Snapped to destination - end transition so user can freely grab without pushback
+        currentTarget.x = cameraTarget[0];
+        currentTarget.y = cameraTarget[1];
+        currentTarget.z = cameraTarget[2];
+        controlsRef.current.update();
+        isTransitioningRef.current = false;
       }
     }
   });
+
+  const isGrabMode = cameraMode === "grab";
 
   return (
     <OrbitControls
@@ -66,16 +90,28 @@ export function CameraController() {
       minDistance={2.2}              // Allow deep zoom-in to inspect agents & desks
       maxDistance={60}               // Allow deep zoom-out so office shrinks nicely on mobile
       enablePan={true}
+      enableRotate={!isGrabMode}     // STRICTLY DISABLE ROTATION IN GRAB MODE - fixes wobble/rotate shaking
       screenSpacePanning={true}     // Direct, responsive 2-finger panning on mobile
-      panSpeed={1.2}
+      panSpeed={1.25}
       rotateSpeed={0.85}
       zoomSpeed={1.2}
+      onStart={() => {
+        // If user initiates manual interaction, immediately abort programmatic target lerp
+        isTransitioningRef.current = false;
+      }}
+      onEnd={() => {
+        // Keep target ref synced with manual pan position so subsequent actions don't snap back
+        if (controlsRef.current) {
+          const t = controlsRef.current.target;
+          prevTargetRef.current = [t.x, t.y, t.z];
+        }
+      }}
       mouseButtons={
-        cameraMode === "grab"
+        isGrabMode
           ? {
               LEFT: THREE.MOUSE.PAN,
               MIDDLE: THREE.MOUSE.DOLLY,
-              RIGHT: THREE.MOUSE.ROTATE,
+              RIGHT: THREE.MOUSE.PAN,
             }
           : {
               LEFT: THREE.MOUSE.ROTATE,
@@ -84,7 +120,7 @@ export function CameraController() {
             }
       }
       touches={
-        cameraMode === "grab"
+        isGrabMode
           ? {
               ONE: THREE.TOUCH.PAN,
               TWO: THREE.TOUCH.DOLLY_PAN,
